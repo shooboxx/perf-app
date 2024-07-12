@@ -1,12 +1,13 @@
 package main
 
 import (
-	"fmt"
+	routes "api/src"
 	"os"
 
 	"github.com/getsentry/sentry-go"
 	sentryfiber "github.com/getsentry/sentry-go/fiber"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
@@ -15,7 +16,7 @@ func main() {
 		Dsn:              os.Getenv("SENTRY_DSN"),
 		TracesSampleRate: 1.0,
 	}); err != nil {
-		fmt.Printf("Sentry initialization failed: %v\n", err)
+		log.Info("Sentry initialization failed: %v\n", err)
 	}
 	app := fiber.New()
 	app.Use(cors.New())
@@ -26,11 +27,7 @@ func main() {
 	})
 	app.Use(sentryHandler)
 
-	api := app.Group("/api")
-
-	api.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("This is a string")
-	})
+	routes.Register(app)
 
 	app.Listen(":8080")
 }
